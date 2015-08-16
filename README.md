@@ -13,7 +13,7 @@ The simplest way to use the library is to use that Writer interface.
 
 ```go
 writer := logentries.LogentriesLogger{
-    "Your Logentries Token Here"
+    "Your Logentries Token Here",
 }
 
 _, err := writer.Write([]byte("Time to write\n"))
@@ -27,7 +27,7 @@ The library then affords all the extended functionality that golang's log librar
 
 ```go
 writer := logentries.LogentriesLogger{
-    "Your Logentries Token Here"
+    "Your Logentries Token Here",
 }
 
 logger := log.New(&writer, "", log.LstdFlags)
