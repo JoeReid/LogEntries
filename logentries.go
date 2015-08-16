@@ -8,19 +8,18 @@ import (
 )
 
 type LogentriesLogger struct {
-    token string
+    Token string
 }
 
 // Write method to make LogentriesLogger implement the io/Writer interface
 // http://golang.org/pkg/io/#Writer
 func (w *LogentriesLogger) Write(p []byte) (n int, err error) {
-    addr := "data.logentries.com:80"
+    addr := "data.logentries.com:443"
 
     rootCerts := x509.NewCertPool()
     success := rootCerts.AppendCertsFromPEM([]byte(pem))
 
     var c net.Conn
-    defer c.Close()
 
     if success {
         c, err = tls.Dial(
@@ -37,5 +36,9 @@ func (w *LogentriesLogger) Write(p []byte) (n int, err error) {
         return 0, errors.New("Error appending root certificates to CertPool")
     }
 
-    return c.Write(p)
+    buff := append([]byte(w.Token + " "), p...)
+    n, err = c.Write(buff)
+
+    defer c.Close()
+    return n, err
 }
