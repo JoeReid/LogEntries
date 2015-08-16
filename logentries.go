@@ -7,13 +7,31 @@ import (
     "crypto/x509"
 )
 
+const (
+    PLAINTEXT = 1 + iota
+    ENCRYPTED
+)
+
+// SendMethod used to imitate an enum type of SendMethod
+type SendMethod int
+
 type LogentriesLogger struct {
     Token string
+    Method SendMethod
 }
 
 // Write method to make LogentriesLogger implement the io/Writer interface
 // http://golang.org/pkg/io/#Writer
 func (w *LogentriesLogger) Write(p []byte) (n int, err error) {
+    if w.Method == PLAINTEXT {
+        return sendPlaintext(w, p)
+    } else if w.Method == ENCRYPTED {
+        return sendEncrypted(w, p)
+    }
+    return 0, errors.New("No such send method in logentries.go")
+}
+
+func sendEncrypted(w *LogentriesLogger, p []byte) (n int, err error) {
     addr := "data.logentries.com:443"
 
     rootCerts := x509.NewCertPool()
@@ -34,6 +52,23 @@ func (w *LogentriesLogger) Write(p []byte) (n int, err error) {
         }
     } else {
         return 0, errors.New("Error appending root certificates to CertPool")
+    }
+
+    buff := append([]byte(w.Token + " "), p...)
+    n, err = c.Write(buff)
+
+    defer c.Close()
+    return n, err
+}
+
+func sendPlaintext(w *LogentriesLogger, p []byte) (n int, err error) {
+    addr := "data.logentries.com:80"
+
+    var c net.Conn
+
+    c, err = net.Dial("tcp", addr)
+    if err != nil {
+        return 0, err
     }
 
     buff := append([]byte(w.Token + " "), p...)

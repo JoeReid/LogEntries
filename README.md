@@ -13,7 +13,8 @@ The simplest way to use the library is to use that Writer interface.
 
 ```go
 writer := logentries.LogentriesLogger{
-    "Your Logentries Token Here"
+    "Your Logentries Token Here",
+    logentries.ENCRYPTED
 }
 
 _, err := writer.Write([]byte("Time to write\n"))
@@ -27,7 +28,8 @@ The library then affords all the extended functionality that golang's log librar
 
 ```go
 writer := logentries.LogentriesLogger{
-    "Your Logentries Token Here"
+    "Your Logentries Token Here",
+    logentries.ENCRYPTED
 }
 
 logger := log.New(&writer, "", log.LstdFlags)
@@ -35,6 +37,19 @@ logger := log.New(&writer, "", log.LstdFlags)
 logger.Println("Hello from logger")
 logger.Fatal("Goodbye from logger")
 
+```
+
+Unencrypted logs
+----------------
+The sending of unencrypted logs (transmited over plain tcp) is supported. To
+enable this behaviour, initialise the logentries.LogentriesLogger struct with
+the value `logentries.PLAINTEXT`
+
+```go
+writer := logentries.LogentriesLogger{
+    "Your Logentries Token Here",
+    logentries.PLAINTEXT
+}
 ```
 
 Code Attribution
